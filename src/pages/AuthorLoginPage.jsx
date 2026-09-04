@@ -3,8 +3,8 @@ import { Music } from 'lucide-react';
 import './AuthorLoginPage.css';
 
 export default function AuthorLoginPage({ onLogin }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('demo@club24.com');
+  const [password, setPassword] = useState('demo@123');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -63,6 +63,9 @@ export default function AuthorLoginPage({ onLogin }) {
           <h2>Admin Login</h2>
 
           {error && <div className="login-error">{error}</div>}
+
+          {/* Demo Credentials Info */}
+          <div className="demo-info">Demo: demo@club24.com / demo@123</div>
 
           {/* Email Field */}
           <div className="form-group">
