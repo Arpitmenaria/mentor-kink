@@ -3,8 +3,8 @@ import { Music } from 'lucide-react';
 import './AuthorLoginPage.css';
 
 export default function AuthorLoginPage({ onLogin }) {
-  const [email, setEmail] = useState('demo@club24.com');
-  const [password, setPassword] = useState('demo@123');
+  const [email, setEmail] = useState('admin@rrca.com');
+  const [password, setPassword] = useState('SecurePassword123!');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,23 +27,53 @@ export default function AuthorLoginPage({ onLogin }) {
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      // Mock authentication
-      if (email && password.length >= 6) {
+    try {
+      // Call backend API
+      const response = await fetch('https://kick-analyst-backend-production.jay886631.workers.dev/api/organizations/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || 'Login failed. Please check your credentials.');
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.data.token) {
         const authorData = {
           id: Math.random().toString(36).substr(2, 9),
           email,
           name: email.split('@')[0],
-          organization: 'Club24',
+          token: data.data.token,
+          organization: data.data.organization.name,
+          organizationId: data.data.organization.id,
+          organizationStatus: data.data.organization.status,
           loginTime: new Date().toISOString(),
         };
+
+        // Store token in localStorage
+        localStorage.setItem('authToken', data.data.token);
+        localStorage.setItem('organization', JSON.stringify(data.data.organization));
+
         onLogin(authorData);
       } else {
-        setError('Invalid credentials');
+        setError('Login failed. Please try again.');
       }
+    } catch (err) {
+      setError(err.message || 'Network error. Please check your connection.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -65,7 +95,7 @@ export default function AuthorLoginPage({ onLogin }) {
           {error && <div className="login-error">{error}</div>}
 
           {/* Demo Credentials Info */}
-          <div className="demo-info">Demo: demo@club24.com / demo@123</div>
+          <div className="demo-info">Demo: admin@rrca.com / SecurePassword123!</div>
 
           {/* Email Field */}
           <div className="form-group">
