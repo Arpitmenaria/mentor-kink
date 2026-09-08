@@ -195,6 +195,7 @@
   align-items: center;
   gap: 12px;
   font-weight: 500;
+  min-width: 0;
 }
 
 .avatar {
@@ -209,6 +210,15 @@
   font-weight: 600;
   color: var(--foreground);
   flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.email-cell {
+  max-width: 250px;
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Badges */
@@ -273,8 +283,14 @@
   justify-content: center;
 }
 
-.action-btn:hover {
+.action-btn:hover:not(:disabled) {
   color: var(--foreground);
+}
+
+.action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  color: #8899b4;
 }
 
 /* Role Dropdown */

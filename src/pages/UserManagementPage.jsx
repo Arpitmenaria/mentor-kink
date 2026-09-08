@@ -233,11 +233,13 @@ export default function UserManagementPage() {
               <tr key={user.id}>
                 <td>
                   <div className="user-cell">
-                    <div className="avatar">{user.avatar || user.name.substring(0, 2).toUpperCase()}</div>
+                    <div className="avatar" style={{ backgroundImage: user.avatar && !user.avatar.includes('http') ? 'none' : `url(${user.avatar})` }}>
+                      {!user.avatar || user.avatar.includes('http') ? '' : user.name.substring(0, 2).toUpperCase()}
+                    </div>
                     <span>{user.name}</span>
                   </div>
                 </td>
-                <td>{user.email}</td>
+                <td className="email-cell">{user.email}</td>
                 <td>
                   <div className="role-dropdown-container">
                     <button
@@ -281,11 +283,13 @@ export default function UserManagementPage() {
                   <div className="action-menu-container">
                     <button
                       className="action-btn"
-                      onClick={() => setOpenActionMenu(openActionMenu === user.id ? null : user.id)}
+                      onClick={() => user.role.toLowerCase() !== 'author' && setOpenActionMenu(openActionMenu === user.id ? null : user.id)}
+                      disabled={user.role.toLowerCase() === 'author'}
+                      title={user.role.toLowerCase() === 'author' ? 'Cannot modify organization author' : ''}
                     >
                       <DotsIcon />
                     </button>
-                    {openActionMenu === user.id && (
+                    {openActionMenu === user.id && user.role.toLowerCase() !== 'author' && (
                       <div className="action-dropdown-menu">
                         <button
                           className="action-option remove"
