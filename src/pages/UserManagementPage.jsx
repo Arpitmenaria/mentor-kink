@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './UserManagementPage.css';
 
 function SearchIcon() {
@@ -13,22 +13,119 @@ function ChevronDownIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>;
 }
 
-const mockUsers = [
-  { id: 1, name: 'Alex Thompson', email: 'alex@example.com', role: 'Admin', status: 'Active', isPremium: true, joinedDate: '01/15/2026', avatar: 'AT' },
-  { id: 2, name: 'Sarah Chen', email: 'sarah@example.com', role: 'Mentor', status: 'Active', isPremium: false, joinedDate: '02/20/2026', avatar: 'SC' },
-  { id: 3, name: 'James Wilson', email: 'james@example.com', role: 'User', status: 'Suspended', isPremium: false, joinedDate: '03/10/2026', avatar: 'JW' },
-  { id: 4, name: 'Emma Davis', email: 'emma@example.com', role: 'User', status: 'Active', isPremium: true, joinedDate: '04/05/2026', avatar: 'ED' },
-];
+function TrashIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
+}
+
+const API_BASE_URL = 'https://kick-analyst-backend-production.jay886631.workers.dev';
 
 export default function UserManagementPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [openRoleDropdown, setOpenRoleDropdown] = useState(null);
-  const [users, setUsers] = useState(mockUsers);
+  const [openActionMenu, setOpenActionMenu] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [stats, setStats] = useState({ total: 0, active: 0, suspended: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const handleRoleChange = (userId, newRole) => {
-    setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
-    setOpenRoleDropdown(null);
+  const getAuthHeader = () => {
+    const token = localStorage.getItem('authToken');
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+  };
+
+  const getOrgId = () => {
+    const org = JSON.parse(localStorage.getItem('organization') || '{}');
+    return org.id;
+  };
+
+  useEffect(() => {
+    fetchMembers();
+  }, []);
+
+  const fetchMembers = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const orgId = getOrgId();
+      const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}/members/list`, {
+        method: 'GET',
+        headers: getAuthHeader(),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch members');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setUsers(data.data.users);
+        setStats({
+          total: data.data.total,
+          active: data.data.active,
+          suspended: data.data.suspended,
+        });
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching members:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRoleChange = async (userId, newRole) => {
+    try {
+      const orgId = getOrgId();
+      const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}/members/${userId}/role`, {
+        method: 'PATCH',
+        headers: getAuthHeader(),
+        body: JSON.stringify({ role: newRole.toLowerCase() }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update role');
+      }
+
+      setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      setOpenRoleDropdown(null);
+    } catch (err) {
+      alert(err.message);
+      console.error('Error updating role:', err);
+    }
+  };
+
+  const handleRemoveMember = async (userId) => {
+    if (!confirm('Are you sure you want to remove this member?')) return;
+
+    try {
+      const orgId = getOrgId();
+      const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}/members/${userId}`, {
+        method: 'DELETE',
+        headers: getAuthHeader(),
+        body: JSON.stringify({}),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to remove member');
+      }
+
+      setUsers(users.filter(u => u.id !== userId));
+      setStats(prev => ({
+        ...prev,
+        total: prev.total - 1,
+        active: prev.active - (users.find(u => u.id === userId)?.status === 'Active' ? 1 : 0),
+      }));
+      setOpenActionMenu(null);
+    } catch (err) {
+      alert(err.message);
+      console.error('Error removing member:', err);
+    }
   };
 
   const filteredUsers = users.filter((user) => {
@@ -47,14 +144,10 @@ export default function UserManagementPage() {
   });
 
   const getRoleBadgeClass = (role) => {
-    switch (role) {
-      case 'Admin':
-        return 'role-admin';
-      case 'Mentor':
-        return 'role-mentor';
-      default:
-        return 'role-user';
-    }
+    const lowerRole = role.toLowerCase();
+    if (lowerRole === 'admin') return 'role-admin';
+    if (lowerRole === 'moderator') return 'role-mentor';
+    return 'role-user';
   };
 
   const getStatusBadgeClass = (status) => {
@@ -63,29 +156,35 @@ export default function UserManagementPage() {
     return 'status-inactive';
   };
 
+  if (loading) {
+    return <div className="user-management-page"><p style={{ padding: '40px', textAlign: 'center' }}>Loading members...</p></div>;
+  }
+
   return (
     <div className="user-management-page">
       {/* Header */}
       <div className="page-header">
         <div>
           <h3 className="header-title">User Management</h3>
-          <p className="header-subtitle">{mockUsers.length} total users</p>
+          <p className="header-subtitle">{stats.total} total users</p>
         </div>
       </div>
+
+      {error && <div className="error-banner">{error}</div>}
 
       {/* Stat Cards */}
       <div className="stats-grid">
         <div className="stat-card">
           <p className="stat-label">TOTAL USERS</p>
-          <p className="stat-value">{mockUsers.length}</p>
+          <p className="stat-value">{stats.total}</p>
         </div>
         <div className="stat-card">
           <p className="stat-label">ACTIVE</p>
-          <p className="stat-value active">{mockUsers.filter((u) => u.status === 'Active').length}</p>
+          <p className="stat-value">{stats.active}</p>
         </div>
         <div className="stat-card">
-          <p className="stat-label">INACTIVE</p>
-          <p className="stat-value inactive">{mockUsers.filter((u) => u.status === 'Inactive').length}</p>
+          <p className="stat-label">SUSPENDED</p>
+          <p className="stat-value">{stats.suspended}</p>
         </div>
       </div>
 
@@ -134,7 +233,7 @@ export default function UserManagementPage() {
               <tr key={user.id}>
                 <td>
                   <div className="user-cell">
-                    <div className="avatar">{user.avatar}</div>
+                    <div className="avatar">{user.avatar || user.name.substring(0, 2).toUpperCase()}</div>
                     <span>{user.name}</span>
                   </div>
                 </td>
@@ -179,9 +278,25 @@ export default function UserManagementPage() {
                 </td>
                 <td>{user.joinedDate}</td>
                 <td className="action-cell">
-                  <button className="action-btn">
-                    <DotsIcon />
-                  </button>
+                  <div className="action-menu-container">
+                    <button
+                      className="action-btn"
+                      onClick={() => setOpenActionMenu(openActionMenu === user.id ? null : user.id)}
+                    >
+                      <DotsIcon />
+                    </button>
+                    {openActionMenu === user.id && (
+                      <div className="action-dropdown-menu">
+                        <button
+                          className="action-option remove"
+                          onClick={() => handleRemoveMember(user.id)}
+                        >
+                          <TrashIcon />
+                          Remove Member
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
