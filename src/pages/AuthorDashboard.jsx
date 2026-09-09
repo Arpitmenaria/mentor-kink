@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { LogOut } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
-import MembersPage from './MembersPage';
 import UserManagementPage from './UserManagementPage';
+import PendingRequestsPage from './PendingRequestsPage';
 import ReportedPostsPage from './ReportedPostsPage';
 import ReportedCommentsPage from './ReportedCommentsPage';
 import ReportedChatsPage from './ReportedChatsPage';
@@ -34,7 +34,10 @@ export default function AuthorDashboard({ authorData, onLogout }) {
       if (activeItem === 'active-members') {
         return <UserManagementPage />;
       }
-      return <MembersPage activeTab={activeTab} />;
+      if (activeItem === 'pending-requests') {
+        return <PendingRequestsPage />;
+      }
+      return <PendingRequestsPage />;
     }
     if (activeSection === 'users') {
       return <UserManagementPage />;
@@ -60,7 +63,7 @@ export default function AuthorDashboard({ authorData, onLogout }) {
     if (activeSection === 'reported-groups') {
       return <ReportedGroupsPage />;
     }
-    return <MembersPage activeTab={activeTab} />;
+    return <PendingRequestsPage />;
   };
 
   const getPageTitle = () => {
