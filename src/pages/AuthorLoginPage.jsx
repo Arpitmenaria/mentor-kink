@@ -6,11 +6,12 @@ export default function AuthorLoginPage({ onLogin }) {
   const [orgId, setOrgId] = useState('');
   const [orgName, setOrgName] = useState('Club24');
   const [orgLogo, setOrgLogo] = useState(null);
-  const [email, setEmail] = useState('admin@rrca.com');
-  const [password, setPassword] = useState('SecurePassword123!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [hasUrlParams, setHasUrlParams] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -25,6 +26,10 @@ export default function AuthorLoginPage({ onLogin }) {
     if (urlOrgLogo) setOrgLogo(urlOrgLogo);
     if (urlAdminEmail) setEmail(urlAdminEmail);
     if (urlAdminPassword) setPassword(urlAdminPassword);
+
+    if (urlOrgId || urlAdminEmail || urlAdminPassword) {
+      setHasUrlParams(true);
+    }
   }, []);
 
   const handleSubmit = async (e) => {
@@ -115,8 +120,6 @@ export default function AuthorLoginPage({ onLogin }) {
           <h2>Admin Login</h2>
 
           {error && <div className="login-error">{error}</div>}
-
-          {!orgLogo && <div className="demo-info">Demo: admin@rrca.com / SecurePassword123!</div>}
 
           {/* Email Field */}
           <div className="form-group">
