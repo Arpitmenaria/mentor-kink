@@ -15,6 +15,14 @@ function XIcon() {
 
 const API_BASE_URL = 'https://kick-analyst-backend-production.jay886631.workers.dev';
 
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${month}/${day}/${year}`;
+};
+
 export default function PendingRequestsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [requests, setRequests] = useState([]);
@@ -239,7 +247,7 @@ export default function PendingRequestsPage() {
                     </div>
                   </td>
                   <td>{request.user.email}</td>
-                  <td>{new Date(request.createdAt).toLocaleDateString()}</td>
+                  <td>{formatDate(request.createdAt)}</td>
                   <td className="action-cell">
                     <button
                       className="action-btn approve"
