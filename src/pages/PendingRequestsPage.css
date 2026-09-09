@@ -31,19 +31,21 @@
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 16px;
+  width: 100%;
 }
 
 .stat-card {
   border: 1px solid var(--border);
   background: #0f1728;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 8px;
+  border-radius: 6px;
   transition: all var(--transition);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
+  min-width: 0;
 }
 
 .stat-card:hover {
@@ -258,6 +260,12 @@
   font-size: 13px;
   margin-bottom: 20px;
   text-align: center;
+}
+
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
