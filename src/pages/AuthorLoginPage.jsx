@@ -1,13 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Music } from 'lucide-react';
 import './AuthorLoginPage.css';
 
 export default function AuthorLoginPage({ onLogin }) {
+  const [orgId, setOrgId] = useState('');
+  const [orgName, setOrgName] = useState('Club24');
+  const [orgLogo, setOrgLogo] = useState(null);
   const [email, setEmail] = useState('admin@rrca.com');
   const [password, setPassword] = useState('SecurePassword123!');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlOrgId = params.get('orgId');
+    const urlOrgName = params.get('orgName');
+    const urlOrgLogo = params.get('orgLogo');
+    const urlAdminEmail = params.get('adminEmail');
+    const urlAdminPassword = params.get('adminPassword');
+
+    if (urlOrgId) setOrgId(urlOrgId);
+    if (urlOrgName) setOrgName(urlOrgName);
+    if (urlOrgLogo) setOrgLogo(urlOrgLogo);
+    if (urlAdminEmail) setEmail(urlAdminEmail);
+    if (urlAdminPassword) setPassword(urlAdminPassword);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,9 +100,13 @@ export default function AuthorLoginPage({ onLogin }) {
         {/* Logo/Header */}
         <div className="login-header">
           <div className="logo-container">
-            <Music size={40} className="logo-icon" />
+            {orgLogo ? (
+              <img src={orgLogo} alt={orgName} className="org-logo" />
+            ) : (
+              <Music size={40} className="logo-icon" />
+            )}
           </div>
-          <h1>Club24</h1>
+          <h1>{orgName}</h1>
           <p className="login-subtitle">Admin Panel</p>
         </div>
 
@@ -94,8 +116,7 @@ export default function AuthorLoginPage({ onLogin }) {
 
           {error && <div className="login-error">{error}</div>}
 
-          {/* Demo Credentials Info */}
-          <div className="demo-info">Demo: admin@rrca.com / SecurePassword123!</div>
+          {!orgLogo && <div className="demo-info">Demo: admin@rrca.com / SecurePassword123!</div>}
 
           {/* Email Field */}
           <div className="form-group">
