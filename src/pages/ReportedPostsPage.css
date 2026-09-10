@@ -210,7 +210,12 @@
 }
 
 .action-cell {
-  text-align: center;
+  position: relative;
+}
+
+.action-menu-container {
+  position: relative;
+  display: inline-block;
 }
 
 .action-btn {
@@ -220,10 +225,115 @@
   cursor: pointer;
   transition: all var(--transition);
   padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.action-btn:hover {
+.action-btn:hover:not(:disabled) {
   color: var(--foreground);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  min-width: 160px;
+  overflow: hidden;
+}
+
+.action-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.action-option:first-child {
+  border-bottom: 1px solid var(--border);
+}
+
+.action-option:hover:not(:disabled) {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.action-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-option.delete {
+  color: var(--destructive);
+}
+
+.action-option.delete:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.action-option.dismiss {
+  color: #10b981;
+}
+
+.action-option.dismiss:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.action-option svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.reasons-cell {
+  font-size: 12px;
+  max-width: 200px;
+}
+
+.reason-item {
+  padding: 4px 0;
+  margin: 4px 0;
+  color: var(--muted-foreground);
+}
+
+.reason-text {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  font-size: 11px;
+}
+
+.error-banner {
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: var(--destructive);
+  font-size: 13px;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 @media (max-width: 768px) {
