@@ -66,10 +66,6 @@
   color: var(--foreground);
 }
 
-.stat-value.green {
-  color: #10b981;
-}
-
 .controls {
   display: flex;
   gap: 16px;
@@ -131,7 +127,8 @@
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 10px;
-  overflow: hidden;
+  overflow: auto;
+  position: relative;
 }
 
 .reports-table {

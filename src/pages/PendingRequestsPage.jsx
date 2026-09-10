@@ -181,31 +181,24 @@ export default function PendingRequestsPage({ onLogout }) {
       {/* Stat Cards */}
       <div className="stats-grid">
         <div className="stat-card">
-          <div className="stat-icon">📋</div>
-          <div className="stat-content">
-            <p className="stat-label">TOTAL</p>
-            <p className="stat-value">{stats.total}</p>
-          </div>
-        </div>
-        <div className="stat-card">
           <div className="stat-icon">⏳</div>
           <div className="stat-content">
             <p className="stat-label">PENDING</p>
-            <p className="stat-value pending">{stats.pending}</p>
+            <p className="stat-value">{stats.pending}</p>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">✅</div>
           <div className="stat-content">
             <p className="stat-label">APPROVED</p>
-            <p className="stat-value approved">{stats.approved}</p>
+            <p className="stat-value">{stats.approved}</p>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">❌</div>
           <div className="stat-content">
             <p className="stat-label">REJECTED</p>
-            <p className="stat-value rejected">{stats.rejected}</p>
+            <p className="stat-value">{stats.rejected}</p>
           </div>
         </div>
       </div>

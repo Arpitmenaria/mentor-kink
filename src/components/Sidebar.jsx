@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Settings, Calendar, Globe, ChevronDown, Music } from 'lucide-react';
+import { Users, Settings, Calendar, Globe, ChevronDown, Music, Share2 } from 'lucide-react';
 import './Sidebar.css';
 
 const sidebarMenu = [
@@ -155,7 +155,8 @@ export default function Sidebar({ onActiveChange, onInviteClick }) {
       {isInviteOnly && (
         <div className="sidebar-footer">
           <button className="invite-btn" onClick={onInviteClick}>
-            ✨ Invite Members
+            <Share2 size={18} />
+            Invite
           </button>
         </div>
       )}

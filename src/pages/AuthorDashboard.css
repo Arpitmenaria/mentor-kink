@@ -35,32 +35,28 @@
 .logout-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: var(--destructive);
+  justify-content: center;
+  gap: 7px;
+  width: 111px;
+  height: 40px;
+  background: #E7000B;
   border: none;
-  border-radius: 8px;
-  color: var(--primary-foreground);
-  font-size: 13px;
-  font-weight: 600;
+  border-radius: 9px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   cursor: pointer;
-  transition: all var(--transition);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
   white-space: nowrap;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .logout-btn:hover {
-  background: #dc2626;
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
-  transform: translateY(-2px);
+  background: #E7000B;
 }
 
 .logout-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+  background: #E7000B;
 }
 
 .logout-btn svg {
