@@ -45,7 +45,7 @@ export default function ReportedPostsPage({ onLogout }) {
     };
   };
 
-  const getSiteId = () => {
+  const getOrgId = () => {
     const org = JSON.parse(localStorage.getItem('organization') || '{}');
     return org.id;
   };
@@ -58,9 +58,9 @@ export default function ReportedPostsPage({ onLogout }) {
     try {
       setLoading(true);
       setError('');
-      const siteId = getSiteId();
+      const orgId = getOrgId();
       const response = await fetch(
-        `${API_BASE_URL}/api/mini-sites/${siteId}/admin/reported-posts?page=1&limit=100`,
+        `${API_BASE_URL}/api/organizations/${orgId}/admin/reported-posts?page=1&limit=100`,
         {
           method: 'GET',
           headers: getAuthHeader(),
@@ -100,9 +100,9 @@ export default function ReportedPostsPage({ onLogout }) {
 
     try {
       setActionLoading(prev => ({ ...prev, [postId]: 'deleting' }));
-      const siteId = getSiteId();
+      const orgId = getOrgId();
       const response = await fetch(
-        `${API_BASE_URL}/api/mini-sites/${siteId}/admin/reported-posts/${postId}`,
+        `${API_BASE_URL}/api/organizations/${orgId}/admin/reported-posts/${postId}`,
         {
           method: 'DELETE',
           headers: getAuthHeader(),
@@ -129,9 +129,9 @@ export default function ReportedPostsPage({ onLogout }) {
 
     try {
       setActionLoading(prev => ({ ...prev, [postId]: 'dismissing' }));
-      const siteId = getSiteId();
+      const orgId = getOrgId();
       const response = await fetch(
-        `${API_BASE_URL}/api/mini-sites/${siteId}/admin/reported-posts/${postId}/dismiss`,
+        `${API_BASE_URL}/api/organizations/${orgId}/admin/reported-posts/${postId}/dismiss`,
         {
           method: 'POST',
           headers: getAuthHeader(),
