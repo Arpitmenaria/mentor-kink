@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Users, Settings, Calendar, Globe, ChevronDown, Music } from 'lucide-react';
 import './Sidebar.css';
 
@@ -58,6 +58,16 @@ export default function Sidebar({ onActiveChange, onInviteClick }) {
     groups: true,
     events: true,
   });
+  const [orgName, setOrgName] = useState('Club24');
+  const [orgLogo, setOrgLogo] = useState(null);
+  const [isInviteOnly, setIsInviteOnly] = useState(false);
+
+  useEffect(() => {
+    const org = JSON.parse(localStorage.getItem('organization') || '{}');
+    if (org.name) setOrgName(org.name);
+    if (org.logo) setOrgLogo(org.logo);
+    if (org.visibility === 'invite-only') setIsInviteOnly(true);
+  }, []);
 
   const toggleSection = (id) => {
     setExpandedSections((prev) => ({
@@ -91,8 +101,12 @@ export default function Sidebar({ onActiveChange, onInviteClick }) {
     <div className="sidebar">
       <div className="sidebar-header">
         <div className="header-icon-title">
-          <Music size={24} className="logo-icon" />
-          <h2>Club24</h2>
+          {orgLogo ? (
+            <img src={orgLogo} alt={orgName} className="org-logo" />
+          ) : (
+            <Music size={24} className="logo-icon" />
+          )}
+          <h2>{orgName}</h2>
         </div>
       </div>
 
@@ -138,11 +152,13 @@ export default function Sidebar({ onActiveChange, onInviteClick }) {
         })}
       </nav>
 
-      <div className="sidebar-footer">
-        <button className="invite-btn" onClick={onInviteClick}>
-          ✨ Invite Members
-        </button>
-      </div>
+      {isInviteOnly && (
+        <div className="sidebar-footer">
+          <button className="invite-btn" onClick={onInviteClick}>
+            ✨ Invite Members
+          </button>
+        </div>
+      )}
     </div>
   );
 }
