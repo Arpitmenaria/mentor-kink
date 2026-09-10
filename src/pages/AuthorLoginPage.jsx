@@ -20,6 +20,7 @@ export default function AuthorLoginPage({ onLogin }) {
     const urlOrgLogo = params.get('orgLogo');
     const urlAdminEmail = params.get('adminEmail');
     const urlAdminPassword = params.get('adminPassword');
+    const inviteToken = params.get('invite');
 
     if (urlOrgId) setOrgId(urlOrgId);
     if (urlOrgName) setOrgName(urlOrgName);
@@ -29,6 +30,10 @@ export default function AuthorLoginPage({ onLogin }) {
 
     if (urlOrgId || urlAdminEmail || urlAdminPassword) {
       setHasUrlParams(true);
+    }
+
+    if (inviteToken) {
+      localStorage.setItem('inviteToken', inviteToken);
     }
   }, []);
 
@@ -87,6 +92,29 @@ export default function AuthorLoginPage({ onLogin }) {
         // Store token in localStorage
         localStorage.setItem('authToken', data.data.token);
         localStorage.setItem('organization', JSON.stringify(data.data.organization));
+
+        // Check if there's an invite token to join
+        const inviteToken = localStorage.getItem('inviteToken');
+        if (inviteToken) {
+          try {
+            const joinResponse = await fetch('https://kick-analyst-backend-production.jay886631.workers.dev/api/organizations/join-by-invite', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${data.data.token}`,
+              },
+              body: JSON.stringify({
+                token: inviteToken,
+              }),
+            });
+
+            if (joinResponse.ok) {
+              localStorage.removeItem('inviteToken');
+            }
+          } catch (inviteErr) {
+            console.error('Error joining by invite:', inviteErr);
+          }
+        }
 
         onLogin(authorData);
       } else {

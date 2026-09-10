@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LogOut } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
+import InviteMembersModal from '../components/InviteMembersModal';
 import UserManagementPage from './UserManagementPage';
 import PendingRequestsPage from './PendingRequestsPage';
 import ReportedPostsPage from './ReportedPostsPage';
@@ -16,6 +17,7 @@ export default function AuthorDashboard({ authorData, onLogout }) {
   const [activeTab, setActiveTab] = useState('active');
   const [activeSection, setActiveSection] = useState('members');
   const [activeItem, setActiveItem] = useState('active-members');
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   const handleActiveChange = (update) => {
     if (update.activeTab) {
@@ -85,7 +87,7 @@ export default function AuthorDashboard({ authorData, onLogout }) {
   return (
     <div className="author-dashboard">
       {/* Sidebar */}
-      <Sidebar onActiveChange={handleActiveChange} />
+      <Sidebar onActiveChange={handleActiveChange} onInviteClick={() => setShowInviteModal(true)} />
 
       {/* Main Content */}
       <div className="dashboard-main">
@@ -103,6 +105,9 @@ export default function AuthorDashboard({ authorData, onLogout }) {
         {/* Page Content */}
         {renderPage()}
       </div>
+
+      {/* Invite Modal */}
+      {showInviteModal && <InviteMembersModal onClose={() => setShowInviteModal(false)} />}
     </div>
   );
 }

@@ -50,7 +50,7 @@ const sidebarMenu = [
   // },
 ];
 
-export default function Sidebar({ onActiveChange }) {
+export default function Sidebar({ onActiveChange, onInviteClick }) {
   const [activeSection, setActiveSection] = useState('active-members');
   const [expandedSections, setExpandedSections] = useState({
     members: true,
@@ -137,6 +137,12 @@ export default function Sidebar({ onActiveChange }) {
           );
         })}
       </nav>
+
+      <div className="sidebar-footer">
+        <button className="invite-btn" onClick={onInviteClick}>
+          ✨ Invite Members
+        </button>
+      </div>
     </div>
   );
 }
