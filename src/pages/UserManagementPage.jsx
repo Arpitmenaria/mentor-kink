@@ -29,6 +29,14 @@ function AlertIcon() {
   return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3.05h16.94a2 2 0 0 0 1.71-3.05L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>;
 }
 
+function EyeIcon() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
+}
+
+function CloseIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+}
+
 const API_BASE_URL = 'https://kick-analyst-backend-production.jay886631.workers.dev';
 
 export default function UserManagementPage({ onLogout }) {
@@ -40,6 +48,8 @@ export default function UserManagementPage({ onLogout }) {
   const [stats, setStats] = useState({ total: 0, active: 0, suspended: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [creatorId, setCreatorId] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const getAuthHeader = () => {
     const token = localStorage.getItem('authToken');
@@ -55,6 +65,8 @@ export default function UserManagementPage({ onLogout }) {
   };
 
   useEffect(() => {
+    const org = JSON.parse(localStorage.getItem('organization') || '{}');
+    if (org.createdBy) setCreatorId(org.createdBy);
     fetchMembers();
   }, []);
 
@@ -252,7 +264,7 @@ export default function UserManagementPage({ onLogout }) {
               <th>ROLE</th>
               <th>STATUS</th>
               <th>JOINED</th>
-              <th>ACTIONS</th>
+              <th className="user-mgmt-actions-header" style={{ textAlign: 'center', paddingLeft: '28px' }}>ACTIONS</th>
             </tr>
           </thead>
           <tbody>
@@ -270,13 +282,20 @@ export default function UserManagementPage({ onLogout }) {
                 <td>
                   <div className="role-dropdown-container">
                     <button
-                      className={`role-dropdown-btn ${getRoleBadgeClass(user.role)}`}
-                      onClick={() => setOpenRoleDropdown(openRoleDropdown === user.id ? null : user.id)}
+                      className={`role-dropdown-btn ${getRoleBadgeClass(user.role)} ${creatorId === user.id || user.role.toLowerCase() === 'author' || user.role.toLowerCase() === 'admin' ? 'disabled' : ''}`}
+                      onClick={() => {
+                        const isCreator = creatorId === user.id || user.role.toLowerCase() === 'author' || user.role.toLowerCase() === 'admin';
+                        if (!isCreator) {
+                          setOpenRoleDropdown(openRoleDropdown === user.id ? null : user.id);
+                        }
+                      }}
+                      disabled={creatorId === user.id || user.role.toLowerCase() === 'author' || user.role.toLowerCase() === 'admin'}
+                      title={creatorId === user.id || user.role.toLowerCase() === 'author' || user.role.toLowerCase() === 'admin' ? 'Organization creator/admin role cannot be changed' : ''}
                     >
                       {user.role}
                       <ChevronDownIcon />
                     </button>
-                    {openRoleDropdown === user.id && (
+                    {openRoleDropdown === user.id && !(creatorId === user.id || user.role.toLowerCase() === 'author' || user.role.toLowerCase() === 'admin') && (
                       <div className="role-dropdown-menu">
                         <button
                           className="role-option"
@@ -306,20 +325,32 @@ export default function UserManagementPage({ onLogout }) {
                   </span>
                 </td>
                 <td>{user.joinedDate}</td>
-                <td className="action-cell">
-                  <div className="action-menu-container">
+                <td className="user-mgmt-action-cell">
+                  <div className="user-mgmt-action-menu">
                     <button
-                      className="action-btn"
-                      onClick={() => user.role.toLowerCase() !== 'author' && setOpenActionMenu(openActionMenu === user.id ? null : user.id)}
-                      disabled={user.role.toLowerCase() === 'author'}
-                      title={user.role.toLowerCase() === 'author' ? 'Cannot modify organization author' : ''}
+                      className="user-mgmt-action-btn"
+                      onClick={() => setSelectedUser(user)}
+                      title="View user details"
+                    >
+                      <EyeIcon />
+                    </button>
+                    <button
+                      className="user-mgmt-action-btn"
+                      onClick={() => {
+                        const isCreator = creatorId === user.id || user.role.toLowerCase() === 'author' || user.role.toLowerCase() === 'admin';
+                        if (!isCreator) {
+                          setOpenActionMenu(openActionMenu === user.id ? null : user.id);
+                        }
+                      }}
+                      disabled={creatorId === user.id || user.role.toLowerCase() === 'author' || user.role.toLowerCase() === 'admin'}
+                      title={creatorId === user.id || user.role.toLowerCase() === 'author' || user.role.toLowerCase() === 'admin' ? 'Cannot modify organization author/admin' : ''}
                     >
                       <DotsIcon />
                     </button>
-                    {openActionMenu === user.id && user.role.toLowerCase() !== 'author' && (
-                      <div className="action-dropdown-menu">
+                    {openActionMenu === user.id && !(creatorId === user.id || user.role.toLowerCase() === 'author' || user.role.toLowerCase() === 'admin') && (
+                      <div className="user-mgmt-action-dropdown">
                         <button
-                          className="action-option remove"
+                          className="user-mgmt-action-option remove"
                           onClick={() => handleRemoveMember(user.id)}
                         >
                           <TrashIcon />
@@ -334,6 +365,67 @@ export default function UserManagementPage({ onLogout }) {
           </tbody>
         </table>
       </div>
+
+      {selectedUser && (
+        <div className="user-details-modal-overlay" onClick={() => setSelectedUser(null)}>
+          <div className="user-details-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="user-details-header">
+              <div>
+                <h2 className="user-details-title">{selectedUser.name}</h2>
+                <p className="user-details-subtitle">User details</p>
+              </div>
+              <button className="user-details-close" onClick={() => setSelectedUser(null)} aria-label="Close">
+                <CloseIcon />
+              </button>
+            </div>
+
+            <div className="user-details-content">
+              <div className="user-details-profile">
+                <div className="avatar-large" style={{ backgroundImage: selectedUser.avatar && !selectedUser.avatar.includes('http') ? 'none' : `url(${selectedUser.avatar})` }}>
+                  {!selectedUser.avatar || selectedUser.avatar.includes('http') ? '' : selectedUser.name.substring(0, 2).toUpperCase()}
+                </div>
+                <h3 className="user-details-name">{selectedUser.name}</h3>
+                <p className="user-details-email">{selectedUser.email}</p>
+              </div>
+
+              <div className="user-details-info">
+                <div className="detail-item">
+                  <label>EMAIL</label>
+                  <p>{selectedUser.email}</p>
+                </div>
+                <div className="detail-item">
+                  <label>ROLE</label>
+                  <span className={`user-details-pill ${selectedUser.role.toLowerCase() === 'admin' ? 'pill-role-admin' : selectedUser.role.toLowerCase() === 'moderator' ? 'pill-role-mentor' : 'pill-role-user'}`}>{selectedUser.role}</span>
+                </div>
+                <div className="detail-item">
+                  <label>STATUS</label>
+                  <span className={`user-details-pill ${selectedUser.status === 'Active' ? 'pill-status-active' : 'pill-status-suspended'}`}>{selectedUser.status}</span>
+                </div>
+                <div className="detail-item">
+                  <label>JOINED</label>
+                  <p>{selectedUser.joinedDate}</p>
+                </div>
+                <div className="detail-item">
+                  <label>PHONE</label>
+                  <p>{selectedUser.phone || 'N/A'}</p>
+                </div>
+                <div className="detail-item">
+                  <label>LOCATION</label>
+                  <p>{selectedUser.location || 'N/A'}</p>
+                </div>
+                <div className="detail-item">
+                  <label>PROFESSION</label>
+                  <p>{selectedUser.profession || 'N/A'}</p>
+                </div>
+                <div className="detail-item">
+                  <label>BIO</label>
+                  <p>{selectedUser.bio || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

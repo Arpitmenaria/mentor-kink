@@ -1,8 +1,9 @@
 .reported-posts-page {
   flex: 1;
   overflow-y: auto;
-  padding: 40px;
+  padding: 32px 40px;
   font-family: var(--font-pjs);
+  background: #0a0e18;
 }
 
 .page-header {
@@ -22,7 +23,7 @@
   margin: 0;
   font-size: 28px;
   font-weight: 700;
-  color: var(--foreground);
+  color: #ffffff;
 }
 
 .header-subtitle {
@@ -153,10 +154,11 @@
 }
 
 .reports-table td {
-  padding: 16px;
-  border-bottom: 1px solid var(--border);
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   font-size: 13px;
-  color: var(--foreground);
+  color: #ffffff;
+  height: 60px;
 }
 
 .reports-table tbody tr:hover {
