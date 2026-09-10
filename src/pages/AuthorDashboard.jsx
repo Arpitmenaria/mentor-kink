@@ -32,38 +32,38 @@ export default function AuthorDashboard({ authorData, onLogout }) {
   const renderPage = () => {
     if (activeSection === 'members') {
       if (activeItem === 'active-members') {
-        return <UserManagementPage />;
+        return <UserManagementPage onLogout={onLogout} />;
       }
       if (activeItem === 'pending-requests') {
-        return <PendingRequestsPage />;
+        return <PendingRequestsPage onLogout={onLogout} />;
       }
-      return <PendingRequestsPage />;
+      return <PendingRequestsPage onLogout={onLogout} />;
     }
     if (activeSection === 'users') {
-      return <UserManagementPage />;
+      return <UserManagementPage onLogout={onLogout} />;
     }
     if (activeSection === 'posts') {
-      return <ReportedPostsPage />;
+      return <ReportedPostsPage onLogout={onLogout} />;
     }
     if (activeSection === 'comments') {
-      return <ReportedCommentsPage />;
+      return <ReportedCommentsPage onLogout={onLogout} />;
     }
     if (activeSection === 'chats') {
-      return <ReportedChatsPage />;
+      return <ReportedChatsPage onLogout={onLogout} />;
     }
     if (activeSection === 'events') {
-      return <EventManagementPage />;
+      return <EventManagementPage onLogout={onLogout} />;
     }
     if (activeSection === 'reported-events') {
-      return <ReportedEventsPage />;
+      return <ReportedEventsPage onLogout={onLogout} />;
     }
     if (activeSection === 'groups') {
-      return <GroupManagementPage />;
+      return <GroupManagementPage onLogout={onLogout} />;
     }
     if (activeSection === 'reported-groups') {
-      return <ReportedGroupsPage />;
+      return <ReportedGroupsPage onLogout={onLogout} />;
     }
-    return <PendingRequestsPage />;
+    return <PendingRequestsPage onLogout={onLogout} />;
   };
 
   const getPageTitle = () => {

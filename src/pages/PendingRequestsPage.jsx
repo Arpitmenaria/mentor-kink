@@ -23,7 +23,7 @@ const formatDate = (dateString) => {
   return `${month}/${day}/${year}`;
 };
 
-export default function PendingRequestsPage() {
+export default function PendingRequestsPage({ onLogout }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [requests, setRequests] = useState([]);
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
@@ -62,6 +62,12 @@ export default function PendingRequestsPage() {
       );
 
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('organization');
+          if (onLogout) onLogout();
+          return;
+        }
         throw new Error('Failed to fetch join requests');
       }
 

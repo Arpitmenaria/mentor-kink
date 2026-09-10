@@ -31,7 +31,7 @@ function AlertIcon() {
 
 const API_BASE_URL = 'https://kick-analyst-backend-production.jay886631.workers.dev';
 
-export default function UserManagementPage() {
+export default function UserManagementPage({ onLogout }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [openRoleDropdown, setOpenRoleDropdown] = useState(null);
@@ -69,6 +69,12 @@ export default function UserManagementPage() {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('organization');
+          if (onLogout) onLogout();
+          return;
+        }
         throw new Error('Failed to fetch members');
       }
 
