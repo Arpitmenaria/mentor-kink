@@ -10,6 +10,7 @@ import ReportedChatsPage from './ReportedChatsPage';
 import EventManagementPage from './EventManagementPage';
 import GroupManagementPage from './GroupManagementPage';
 import ReportedGroupsPage from './ReportedGroupsPage';
+import CreateGroupPage from './CreateGroupPage';
 import ReportedEventsPage from './ReportedEventsPage';
 import './AuthorDashboard.css';
 
@@ -60,7 +61,16 @@ export default function AuthorDashboard({ authorData, onLogout }) {
       return <ReportedEventsPage onLogout={onLogout} />;
     }
     if (activeSection === 'groups') {
-      return <GroupManagementPage onLogout={onLogout} />;
+      return <GroupManagementPage onLogout={onLogout} onCreateClick={() => setActiveSection('create-group')} />;
+    }
+    if (activeSection === 'create-group') {
+      return (
+        <CreateGroupPage
+          onLogout={onLogout}
+          onBack={() => setActiveSection('groups')}
+          onCreateGroup={() => setActiveSection('groups')}
+        />
+      );
     }
     if (activeSection === 'reported-groups') {
       return <ReportedGroupsPage onLogout={onLogout} />;
@@ -80,6 +90,7 @@ export default function AuthorDashboard({ authorData, onLogout }) {
     if (activeSection === 'events') return 'Event Management';
     if (activeSection === 'reported-events') return 'Reported Events';
     if (activeSection === 'groups') return 'Group Management';
+    if (activeSection === 'create-group') return 'Create Group';
     if (activeSection === 'reported-groups') return 'Reported Groups';
     return 'Active Members';
   };

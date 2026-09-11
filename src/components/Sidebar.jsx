@@ -26,17 +26,17 @@ const sidebarMenu = [
       { id: 'reported-chats', label: 'Reported Chats', section: 'chats' },
     ],
   },
-  // {
-  //   id: 'groups',
-  //   label: 'Group Management',
-  //   icon: Users,
-  //   collapsible: true,
-  //   defaultOpen: true,
-  //   items: [
-  //     { id: 'groups', label: 'Groups', section: 'groups' },
-  //     { id: 'reported-groups', label: 'Reported Groups', section: 'reported-groups' },
-  //   ],
-  // },
+  {
+    id: 'groups',
+    label: 'Group Management',
+    icon: Users,
+    collapsible: true,
+    defaultOpen: true,
+    items: [
+      { id: 'groups', label: 'Groups', section: 'groups' },
+      { id: 'reported-groups', label: 'Reported Groups', section: 'reported-groups' },
+    ],
+  },
   // {
   //   id: 'events',
   //   label: 'Event Management',
