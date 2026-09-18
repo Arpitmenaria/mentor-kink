@@ -12,6 +12,8 @@ import GroupManagementPage from './GroupManagementPage';
 import ReportedGroupsPage from './ReportedGroupsPage';
 import CreateGroupPage from './CreateGroupPage';
 import ReportedEventsPage from './ReportedEventsPage';
+import CreateEventPage from './CreateEventPage';
+import CalendarPage from './CalendarPage';
 import './AuthorDashboard.css';
 
 export default function AuthorDashboard({ authorData, onLogout }) {
@@ -55,7 +57,16 @@ export default function AuthorDashboard({ authorData, onLogout }) {
       return <ReportedChatsPage onLogout={onLogout} />;
     }
     if (activeSection === 'events') {
-      return <EventManagementPage onLogout={onLogout} />;
+      return <EventManagementPage onLogout={onLogout} onCreateClick={() => setActiveSection('create-event')} />;
+    }
+    if (activeSection === 'create-event') {
+      return (
+        <CreateEventPage
+          onLogout={onLogout}
+          onBack={() => setActiveSection('events')}
+          onCreateEvent={() => setActiveSection('events')}
+        />
+      );
     }
     if (activeSection === 'reported-events') {
       return <ReportedEventsPage onLogout={onLogout} />;
@@ -75,6 +86,9 @@ export default function AuthorDashboard({ authorData, onLogout }) {
     if (activeSection === 'reported-groups') {
       return <ReportedGroupsPage onLogout={onLogout} />;
     }
+    if (activeSection === 'calendar') {
+      return <CalendarPage onLogout={onLogout} onEventsCreateClick={() => setActiveSection('create-event')} />;
+    }
     return <PendingRequestsPage onLogout={onLogout} />;
   };
 
@@ -88,10 +102,12 @@ export default function AuthorDashboard({ authorData, onLogout }) {
     if (activeSection === 'comments') return 'Reported Comments';
     if (activeSection === 'chats') return 'Reported Chats';
     if (activeSection === 'events') return 'Event Management';
+    if (activeSection === 'create-event') return 'Create Event';
     if (activeSection === 'reported-events') return 'Reported Events';
     if (activeSection === 'groups') return 'Group Management';
     if (activeSection === 'create-group') return 'Create Group';
     if (activeSection === 'reported-groups') return 'Reported Groups';
+    if (activeSection === 'calendar') return 'Event Calendar';
     return 'Active Members';
   };
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './ReportedGroupsPage.css';
 
 function SearchIcon() {
@@ -9,35 +9,115 @@ function DotsIcon() {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>;
 }
 
-const mockReportedGroups = [
-  { id: 1, groupName: 'Crypto Scam Network', reportedBy: 'Marcus Thorne', reason: 'Illegal Activity', reportCount: 24, status: 'Pending', reportedDate: '06/28/2025' },
-  { id: 2, groupName: 'Fake Investment Scheme', reportedBy: 'Elena Voss', reason: 'Fraud', reportCount: 18, status: 'Under Review', reportedDate: '06/27/2025' },
-  { id: 3, groupName: 'Hate Speech Community', reportedBy: 'Anonymous', reason: 'Hate Speech', reportCount: 12, status: 'Reviewed', reportedDate: '06/25/2025' },
-  { id: 4, groupName: 'Private Exploitation Ring', reportedBy: 'John Doe', reason: 'Exploitation', reportCount: 35, status: 'Pending', reportedDate: '06/29/2025' },
-];
+const API_BASE_URL = 'https://kick-analyst-backend-production.jay886631.workers.dev';
 
-export default function ReportedGroupsPage() {
+const STATUS_QUERY_MAP = {
+  Pending: 'pending',
+  'Under Review': 'under_review',
+  Reviewed: 'reviewed',
+};
+
+function formatDate(isoString) {
+  if (!isoString) return 'N/A';
+  const d = new Date(isoString);
+  if (isNaN(d.getTime())) return isoString;
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${mm}/${dd}/${d.getFullYear()}`;
+}
+
+export default function ReportedGroupsPage({ onLogout }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const filteredGroups = mockReportedGroups.filter((group) => {
-    const matchesSearch = group.groupName.toLowerCase().includes(searchTerm.toLowerCase()) || group.reportedBy.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'All' || group.status === statusFilter;
+  const getAuthHeader = () => {
+    const token = localStorage.getItem('authToken');
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+  };
+
+  const getOrgId = () => {
+    const org = JSON.parse(localStorage.getItem('organization') || '{}');
+    return org.id;
+  };
+
+  useEffect(() => {
+    fetchReports(statusFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter]);
+
+  const fetchReports = async (filter) => {
+    try {
+      setLoading(true);
+      setError('');
+      const orgId = getOrgId();
+      const statusQuery = STATUS_QUERY_MAP[filter];
+      const url = `${API_BASE_URL}/api/organizations/${orgId}/reports${statusQuery ? `?status=${statusQuery}` : ''}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: getAuthHeader(),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('organization');
+          if (onLogout) onLogout();
+          return;
+        }
+        throw new Error('Failed to fetch reported groups');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setReports(data.data.reports || data.data || []);
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching reported groups:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getGroupName = (report) => report.group?.name || report.groupName || 'N/A';
+  const getReportedBy = (report) => report.reportedBy?.fullName || report.reportedBy || 'Anonymous';
+  const getReason = (report) => report.reason || report.reports?.[0]?.reason || 'N/A';
+  const getReportCount = (report) => report.reportsCount ?? report.reportCount ?? report.reports?.length ?? 1;
+  const getStatus = (report) => report.status || (report.reviewed ? 'Reviewed' : 'Pending');
+  const getReportedDate = (report) => report.createdAt || report.reportedDate;
+
+  const filteredReports = reports.filter((report) => {
+    const matchesSearch =
+      getGroupName(report).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      getReportedBy(report).toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'All' || getStatus(report).toLowerCase().replace(/\s+/g, '_') === STATUS_QUERY_MAP[statusFilter];
     return matchesSearch && matchesStatus;
   });
 
   const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case 'Pending': return 'status-pending';
-      case 'Under Review': return 'status-review';
-      case 'Reviewed': return 'status-reviewed';
+    switch (status?.toLowerCase()) {
+      case 'pending': return 'status-pending';
+      case 'under_review':
+      case 'under review': return 'status-review';
+      case 'reviewed': return 'status-reviewed';
       default: return 'status-default';
     }
   };
 
-  const totalReports = mockReportedGroups.reduce((sum, g) => sum + g.reportCount, 0);
-  const pendingReports = mockReportedGroups.filter(g => g.status === 'Pending').reduce((sum, g) => sum + g.reportCount, 0);
-  const reviewedReports = mockReportedGroups.filter(g => g.status === 'Reviewed').reduce((sum, g) => sum + g.reportCount, 0);
+  const totalReports = reports.reduce((sum, r) => sum + getReportCount(r), 0);
+  const pendingReports = reports.filter(r => getStatus(r).toLowerCase() === 'pending').reduce((sum, r) => sum + getReportCount(r), 0);
+  const reviewedReports = reports.filter(r => getStatus(r).toLowerCase() === 'reviewed').reduce((sum, r) => sum + getReportCount(r), 0);
+
+  if (loading) {
+    return <div className="reported-groups-page"><p style={{ padding: '40px', textAlign: 'center' }}>Loading reported groups...</p></div>;
+  }
 
   return (
     <div className="reported-groups-page">
@@ -47,6 +127,8 @@ export default function ReportedGroupsPage() {
           <p className="header-subtitle">{totalReports} total reports</p>
         </div>
       </div>
+
+      {error && <div className="error-banner">{error}</div>}
 
       <div className="stats-grid">
         <div className="stat-card">
@@ -90,17 +172,22 @@ export default function ReportedGroupsPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredGroups.map((group) => (
-              <tr key={group.id}>
-                <td className="group-name">{group.groupName}</td>
-                <td>{group.reportedBy}</td>
-                <td><span className="badge-reason">{group.reason}</span></td>
-                <td><span className="badge-count">{group.reportCount}</span></td>
-                <td><span className={`badge-status ${getStatusBadgeClass(group.status)}`}>{group.status}</span></td>
-                <td className="date">{group.reportedDate}</td>
+            {filteredReports.map((report) => (
+              <tr key={report._id || report.id}>
+                <td className="group-name">{getGroupName(report)}</td>
+                <td>{getReportedBy(report)}</td>
+                <td><span className="badge-reason">{getReason(report)}</span></td>
+                <td><span className="badge-count">{getReportCount(report)}</span></td>
+                <td><span className={`badge-status ${getStatusBadgeClass(getStatus(report))}`}>{getStatus(report)}</span></td>
+                <td className="date">{formatDate(getReportedDate(report))}</td>
                 <td className="action-cell"><button className="action-btn"><DotsIcon /></button></td>
               </tr>
             ))}
+            {filteredReports.length === 0 && (
+              <tr>
+                <td colSpan={7} style={{ textAlign: 'center', padding: '40px' }}>No reported groups found.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

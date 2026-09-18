@@ -13,6 +13,10 @@ function CalendarIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
 }
 
+function PlusIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
+}
+
 const mockEvents = [
   { id: 1, name: 'Tech Conference 2026', category: 'Technology', location: 'San Francisco, CA', attendees: 450, capacity: 500, status: 'Upcoming', eventDate: '09/15/2026', host: 'Alex Thompson' },
   { id: 2, name: 'Design Workshop', category: 'Design', location: 'New York, NY', attendees: 120, capacity: 150, status: 'Ongoing', eventDate: '09/01/2026', host: 'Sarah Chen' },
@@ -20,7 +24,7 @@ const mockEvents = [
   { id: 4, name: 'Music Festival', category: 'Entertainment', location: 'Los Angeles, CA', attendees: 2500, capacity: 3000, status: 'Upcoming', eventDate: '09/25/2026', host: 'Emma Davis' },
 ];
 
-export default function EventManagementPage() {
+export default function EventManagementPage({ onCreateClick }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
 
@@ -46,6 +50,10 @@ export default function EventManagementPage() {
           <h3 className="header-title">Event Management</h3>
           <p className="header-subtitle">{mockEvents.length} total events</p>
         </div>
+        <button className="create-event-btn" onClick={onCreateClick}>
+          <PlusIcon />
+          Create Event
+        </button>
       </div>
 
       <div className="stats-grid">

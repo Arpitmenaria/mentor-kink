@@ -37,17 +37,24 @@ const sidebarMenu = [
       { id: 'reported-groups', label: 'Reported Groups', section: 'reported-groups' },
     ],
   },
-  // {
-  //   id: 'events',
-  //   label: 'Event Management',
-  //   icon: Calendar,
-  //   collapsible: true,
-  //   defaultOpen: true,
-  //   items: [
-  //     { id: 'events', label: 'Events', section: 'events' },
-  //     { id: 'reported-events', label: 'Reported Events', section: 'reported-events' },
-  //   ],
-  // },
+  {
+    id: 'events',
+    label: 'Event Management',
+    icon: Calendar,
+    collapsible: true,
+    defaultOpen: true,
+    items: [
+      { id: 'events', label: 'Events', section: 'events' },
+      { id: 'reported-events', label: 'Reported Events', section: 'reported-events' },
+    ],
+  },
+  {
+    id: 'calendar',
+    label: 'Event Calendar',
+    icon: Calendar,
+    collapsible: false,
+    section: 'calendar',
+  },
 ];
 
 export default function Sidebar({ onActiveChange, onInviteClick }) {

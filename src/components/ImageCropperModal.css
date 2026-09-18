@@ -1,0 +1,140 @@
+.icm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 24px;
+}
+
+.icm-modal {
+  background: var(--card, #0d1321);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.icm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.icm-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--foreground, #ffffff);
+}
+
+.icm-close {
+  background: none;
+  border: none;
+  color: var(--muted-foreground, #8899b4);
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.icm-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.icm-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #05070d;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.icm-frame:active {
+  cursor: grabbing;
+}
+
+.icm-frame img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  max-width: none;
+  transform-origin: center;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+.icm-zoom-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--muted-foreground, #8899b4);
+}
+
+.icm-zoom-row input[type="range"] {
+  flex: 1;
+  accent-color: #2563eb;
+}
+
+.icm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.icm-btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  color: var(--foreground, #ffffff);
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.icm-btn-secondary:hover {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: #2563eb;
+}
+
+.icm-btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+  font-family: inherit;
+}
+
+.icm-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.icm-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
