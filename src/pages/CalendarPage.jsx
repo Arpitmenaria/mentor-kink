@@ -110,6 +110,7 @@ function LocationRadiusFilter({ pendingF, setPendingF, onUseMyLocation, locating
 }
 
 /* ── Constants ── */
+const API_BASE_URL = 'https://kick-analyst-backend-production.jay886631.workers.dev';
 const HOUR_HEIGHT  = 80;
 const GRID_START   = 9;
 const HOURS        = [9, 10, 11, 12, 13, 14, 15, 16, 17];
@@ -369,15 +370,8 @@ function getEventsInWeek(week, events) {
    Main Component
 ══════════════════════════════ */
 export default function CalendarPage({ onLogout, onEventClick, onViewStateChange, onEventsCreateClick }) {
-  // Mock events data for admin calendar
-  const allEvents = [
-    { id: 1, title: 'Tech Conference', category: 'Technology', startDate: '2026-09-20', startTime: '10:00', endTime: '14:00', isAllDay: false },
-    { id: 2, title: 'Design Workshop', category: 'Design', startDate: '2026-09-21', startTime: '09:00', endTime: '12:00', isAllDay: false },
-    { id: 3, title: 'Networking Event', category: 'Business', startDate: '2026-09-22', startTime: '18:00', endTime: '20:00', isAllDay: false },
-  ];
-  const calendarEvents = allEvents;
-  const eventsLoading = false;
-  const calendarLoading = false;
+  const [allEvents, setAllEvents] = useState([]);
+  const [eventsError, setEventsError] = useState('');
   const [monday,    setMonday]   = useState(getMondayOf(new Date()));
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [monthDate, setMonthDate] = useState(new Date());
@@ -407,12 +401,74 @@ export default function CalendarPage({ onLogout, onEventClick, onViewStateChange
   const [showFilter, setShowFilter] = useState(false);
   const [locatingMe, setLocatingMe] = useState(false);
 
+  const getAuthHeader = () => {
+    const token = localStorage.getItem('authToken');
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+  };
+
+  const getOrgId = () => {
+    const org = JSON.parse(localStorage.getItem('organization') || '{}');
+    return org.id;
+  };
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchEvents = async () => {
+    try {
+      setIsLoading(true);
+      setEventsError('');
+      const orgId = getOrgId();
+      const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}/events?page=1&limit=100`, {
+        method: 'GET',
+        headers: getAuthHeader(),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('organization');
+          if (onLogout) onLogout();
+          return;
+        }
+        throw new Error('Failed to fetch events');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        const rawEvents = data.data.events || data.data || [];
+        // The list endpoint returns `fullDate` (no time-of-day) rather than
+        // startTime/endTime/isAllDay — those only come back from the single
+        // -event detail endpoint. Until the list response includes them too,
+        // week/day grid positioning falls back to a default 1hr block; month
+        // view (which only needs the date) is fully accurate either way.
+        setAllEvents(rawEvents.map((ev) => ({
+          id: ev.id || ev._id,
+          title: ev.title || ev.name || 'Untitled event',
+          category: ev.category,
+          startDate: ev.startDate || ev.fullDate,
+          endDate: ev.endDate || ev.startDate || ev.fullDate,
+          startTime: ev.startTime || '',
+          endTime: ev.endTime || '',
+          isAllDay: ev.isAllDay ?? false,
+        })));
+      }
+    } catch (err) {
+      setEventsError(err.message);
+      console.error('Error fetching calendar events:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // Mock data already loaded - no API calls needed for admin
+    fetchEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const scopedEvents = allEvents;
-  const isLoading = false;
   const filteredEvents = scopedEvents;
   const radiusFilterActive = false;
   const geoResolving = false;
@@ -522,6 +578,12 @@ export default function CalendarPage({ onLogout, onEventClick, onViewStateChange
             </button>
           </div>
         </div>
+
+        {eventsError && (
+          <div style={{ margin: '0 28px 12px', padding: '10px 14px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, color: '#f87171', fontSize: 13 }}>
+            {eventsError}
+          </div>
+        )}
 
         {isLoading ? (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

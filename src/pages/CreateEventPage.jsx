@@ -122,12 +122,6 @@ export default function CreateEventPage({ onBack, onCreateEvent, onLogout }) {
     return org.id;
   };
 
-  // Mini-site events are scoped by siteId. This admin portal only stores the
-  // organization's id in localStorage, so we assume a 1:1 org<->mini-site
-  // mapping for now — swap this for org.miniSiteId (or a dedicated lookup)
-  // once the backend confirms how mini-site ids are actually assigned.
-  const getSiteId = () => getOrgId();
-
   const updateField = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -238,7 +232,7 @@ export default function CreateEventPage({ onBack, onCreateEvent, onLogout }) {
     try {
       setCreating(true);
       setPublishErrors([]);
-      const siteId = getSiteId();
+      const orgId = getOrgId();
 
       const showOfflineFields = form.eventType === 'offline' || form.eventType === 'both';
       const showOnlineFields = form.eventType === 'online' || form.eventType === 'both';
@@ -289,7 +283,7 @@ export default function CreateEventPage({ onBack, onCreateEvent, onLogout }) {
 
       if (coverImgFile) fd.append('coverImages', coverImgFile);
 
-      const response = await fetch(`${API_BASE_URL}/api/mini-sites/${siteId}/events`, {
+      const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}/events`, {
         method: 'POST',
         headers: getAuthHeader(),
         body: fd,
