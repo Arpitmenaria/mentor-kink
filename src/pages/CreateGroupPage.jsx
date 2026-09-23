@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import ImageCropper from '../components/ImageCropper';
 import './CreateGroupPage.css';
 
 function BackIcon() {
@@ -11,6 +12,10 @@ function CameraIcon() {
 
 function PencilIcon() {
   return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>;
+}
+
+function TrashIcon({ size = 14 }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
 }
 
 function ChevronDownIcon() {
@@ -50,6 +55,9 @@ export default function CreateGroupPage({ onBack, onCreateGroup, onLogout }) {
   const [groupImg, setGroupImg] = useState('');
   const [groupImgFile, setGroupImgFile] = useState(null);
 
+  const [cropTarget, setCropTarget] = useState(null); // 'cover' | 'photo'
+  const [cropFile, setCropFile] = useState(null);
+
   const [errors, setErrors] = useState({});
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
@@ -67,17 +75,47 @@ export default function CreateGroupPage({ onBack, onCreateGroup, onLogout }) {
   const handleCoverChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setCoverImgFile(file);
-    setCoverImg(URL.createObjectURL(file));
+    setCropTarget('cover');
+    setCropFile(file);
     e.target.value = '';
   };
 
   const handleGroupImgChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setGroupImgFile(file);
-    setGroupImg(URL.createObjectURL(file));
+    setCropTarget('photo');
+    setCropFile(file);
     e.target.value = '';
+  };
+
+  const applyCroppedFile = (file) => {
+    const url = URL.createObjectURL(file);
+    if (cropTarget === 'cover') {
+      setCoverImgFile(file);
+      setCoverImg(url);
+    } else if (cropTarget === 'photo') {
+      setGroupImgFile(file);
+      setGroupImg(url);
+    }
+    setCropFile(null);
+    setCropTarget(null);
+  };
+
+  const handleCropSave = (croppedFile) => applyCroppedFile(croppedFile);
+  const handleCropSkip = () => applyCroppedFile(cropFile);
+  const handleCropCancel = () => {
+    setCropFile(null);
+    setCropTarget(null);
+  };
+
+  const handleRemoveCover = () => {
+    setCoverImg('');
+    setCoverImgFile(null);
+  };
+
+  const handleRemoveGroupImg = () => {
+    setGroupImg('');
+    setGroupImgFile(null);
   };
 
   const validate = () => {
@@ -150,11 +188,24 @@ export default function CreateGroupPage({ onBack, onCreateGroup, onLogout }) {
           <BackIcon />
         </button>
 
-        <label className="cg-edit-cover-btn">
-          <CameraIcon />
-          Edit Cover
-          <input type="file" accept="image/*" onChange={handleCoverChange} hidden />
-        </label>
+        <div className="cg-cover-actions">
+          <label className="cg-edit-cover-btn">
+            <CameraIcon />
+            Edit Cover
+            <input type="file" accept="image/*" onChange={handleCoverChange} hidden />
+          </label>
+          {coverImg && (
+            <button
+              type="button"
+              className="cg-remove-cover-btn"
+              onClick={handleRemoveCover}
+              aria-label="Remove cover image"
+              title="Remove cover image"
+            >
+              <TrashIcon size={16} />
+            </button>
+          )}
+        </div>
 
         <div className="cg-profile-photo-wrap">
           <div className="cg-profile-photo" style={groupImg ? { backgroundImage: `url(${groupImg})` } : {}}>
@@ -163,6 +214,17 @@ export default function CreateGroupPage({ onBack, onCreateGroup, onLogout }) {
               <PencilIcon />
               <input type="file" accept="image/*" onChange={handleGroupImgChange} hidden />
             </label>
+            {groupImg && (
+              <button
+                type="button"
+                className="cg-profile-remove-btn"
+                onClick={handleRemoveGroupImg}
+                aria-label="Remove group photo"
+                title="Remove group photo"
+              >
+                <TrashIcon size={13} />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -173,7 +235,10 @@ export default function CreateGroupPage({ onBack, onCreateGroup, onLogout }) {
           {/* Group Identity */}
           <div className="cg-section">
             <div className="cg-field">
-              <label htmlFor="cg-group-name">Group Name</label>
+              <div className="cg-label-row">
+                <label htmlFor="cg-group-name">Group Name</label>
+                <span className="cg-char-count">{groupName.length}/50</span>
+              </div>
               <input
                 id="cg-group-name"
                 type="text"
@@ -182,13 +247,14 @@ export default function CreateGroupPage({ onBack, onCreateGroup, onLogout }) {
                 onChange={(e) => setGroupName(e.target.value)}
                 className={errors.groupName ? 'cg-input-error' : ''}
               />
-              <span className="cg-helper">
-                {errors.groupName || 'Keep it short and descriptive. Max 50 characters.'}
-              </span>
+              {errors.groupName && <span className="cg-helper">{errors.groupName}</span>}
             </div>
 
             <div className="cg-field">
-              <label htmlFor="cg-mission">Group Mission</label>
+              <div className="cg-label-row">
+                <label htmlFor="cg-mission">Group Mission</label>
+                <span className="cg-char-count">{mission.length}/100</span>
+              </div>
               <input
                 id="cg-mission"
                 type="text"
@@ -197,9 +263,7 @@ export default function CreateGroupPage({ onBack, onCreateGroup, onLogout }) {
                 onChange={(e) => setMission(e.target.value)}
                 className={errors.mission ? 'cg-input-error' : ''}
               />
-              <span className="cg-helper">
-                {errors.mission || 'A one-line purpose statement for your group. Max 100 characters.'}
-              </span>
+              {errors.mission && <span className="cg-helper">{errors.mission}</span>}
             </div>
 
             <div className="cg-field">
@@ -256,6 +320,17 @@ export default function CreateGroupPage({ onBack, onCreateGroup, onLogout }) {
           </button>
         </div>
       </form>
+
+      {cropFile && (
+        <ImageCropper
+          file={cropFile}
+          defaultAspect={cropTarget === 'cover' ? 'cover' : 'square'}
+          cropShape={cropTarget === 'cover' ? 'rect' : 'round'}
+          onSave={handleCropSave}
+          onSkip={handleCropSkip}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 }

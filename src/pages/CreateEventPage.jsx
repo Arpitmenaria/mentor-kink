@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ImageCropperModal from '../components/ImageCropperModal';
+import ImageCropper from '../components/ImageCropper';
 import './CreateEventPage.css';
 
 function BackIcon() {
@@ -100,7 +100,7 @@ export default function CreateEventPage({ onBack, onCreateEvent, onLogout }) {
   const [pricingType, setPricingType] = useState('free');
   const [coverImg, setCoverImg] = useState('');
   const [coverImgFile, setCoverImgFile] = useState(null);
-  const [cropSrc, setCropSrc] = useState('');
+  const [cropFile, setCropFile] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [newTicket, setNewTicket] = useState(initialTicket);
   const [parking, setParking] = useState('');
@@ -135,21 +135,23 @@ export default function CreateEventPage({ onBack, onCreateEvent, onLogout }) {
   const handleCoverChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setCropSrc(URL.createObjectURL(file));
+    setCropFile(file);
     e.target.value = '';
   };
 
-  const handleCropSave = (blob) => {
-    const file = new File([blob], 'cover.jpg', { type: 'image/jpeg' });
+  const applyCoverFile = (file) => {
     setCoverImgFile(file);
-    setCoverImg(URL.createObjectURL(blob));
-    URL.revokeObjectURL(cropSrc);
-    setCropSrc('');
+    setCoverImg(URL.createObjectURL(file));
+    setCropFile(null);
   };
 
-  const handleCropCancel = () => {
-    URL.revokeObjectURL(cropSrc);
-    setCropSrc('');
+  const handleCropSave = (croppedFile) => applyCoverFile(croppedFile);
+  const handleCropSkip = () => applyCoverFile(cropFile);
+  const handleCropCancel = () => setCropFile(null);
+
+  const handleRemoveCover = () => {
+    setCoverImg('');
+    setCoverImgFile(null);
   };
 
   const addTicket = () => {
@@ -561,15 +563,28 @@ export default function CreateEventPage({ onBack, onCreateEvent, onLogout }) {
                 {/* Cover Image */}
                 <div className="ev-field">
                   <label className="ev-label">Cover Image</label>
-                  <label className="ev-cover-upload-label" style={coverImg ? { backgroundImage: `url(${coverImg})` } : {}}>
-                    {!coverImg && (
-                      <span className="ev-cover-upload-placeholder">
-                        <CameraIcon />
-                        Click to upload cover image
-                      </span>
+                  <div className="ev-cover-upload-wrap">
+                    <label className="ev-cover-upload-label" style={coverImg ? { backgroundImage: `url(${coverImg})` } : {}}>
+                      {!coverImg && (
+                        <span className="ev-cover-upload-placeholder">
+                          <CameraIcon />
+                          Click to upload cover image
+                        </span>
+                      )}
+                      <input type="file" accept="image/*" hidden onChange={handleCoverChange} />
+                    </label>
+                    {coverImg && (
+                      <button
+                        type="button"
+                        className="ev-cover-remove-btn"
+                        onClick={handleRemoveCover}
+                        aria-label="Remove cover image"
+                        title="Remove cover image"
+                      >
+                        <TrashIcon />
+                      </button>
                     )}
-                    <input type="file" accept="image/*" hidden onChange={handleCoverChange} />
-                  </label>
+                  </div>
                 </div>
               </div>
             </>
@@ -936,11 +951,13 @@ export default function CreateEventPage({ onBack, onCreateEvent, onLogout }) {
         </div>
       </div>
 
-      {cropSrc && (
-        <ImageCropperModal
-          src={cropSrc}
-          aspect={2}
+      {cropFile && (
+        <ImageCropper
+          file={cropFile}
+          defaultAspect="cover"
+          cropShape="rect"
           onSave={handleCropSave}
+          onSkip={handleCropSkip}
           onCancel={handleCropCancel}
         />
       )}

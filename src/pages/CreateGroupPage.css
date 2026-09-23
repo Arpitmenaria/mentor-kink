@@ -49,10 +49,16 @@
   background: rgba(7, 11, 20, 0.65);
 }
 
-.cg-edit-cover-btn {
+.cg-cover-actions {
   position: absolute;
   top: 20px;
   right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cg-edit-cover-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -69,6 +75,25 @@
 
 .cg-edit-cover-btn:hover {
   background: rgba(7, 11, 20, 0.65);
+}
+
+.cg-remove-cover-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(7, 11, 20, 0.4);
+  border: none;
+  color: #ffffff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.cg-remove-cover-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
 }
 
 .cg-profile-photo-wrap {
@@ -118,6 +143,27 @@
   filter: brightness(1.1);
 }
 
+.cg-profile-remove-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid #070b14;
+  transition: filter 0.2s ease-in-out;
+}
+
+.cg-profile-remove-btn:hover {
+  filter: brightness(1.1);
+}
+
 /* Form */
 .cg-form-container {
   display: flex;
@@ -159,8 +205,21 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #7c8fa3;
-  margin-bottom: 8px;
   display: block;
+}
+
+.cg-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.cg-char-count {
+  font-size: 12px;
+  font-weight: 500;
+  color: #5c6a8c;
+  flex-shrink: 0;
 }
 
 .cg-field input[type="text"],
