@@ -44,7 +44,7 @@ export default function AuthorLoginPage({ onLogin }) {
 
     // Validation
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setError('please fill all fields');
       setLoading(false);
       return;
     }
@@ -132,6 +132,7 @@ export default function AuthorLoginPage({ onLogin }) {
       <div className="login-container">
         {/* Logo/Header */}
         <div className="login-header">
+          <p className="login-subtitle">Admin Panel</p>
           <div className="logo-container">
             {orgLogo ? (
               <img src={orgLogo} alt={orgName} className="org-logo" />
@@ -140,7 +141,6 @@ export default function AuthorLoginPage({ onLogin }) {
             )}
           </div>
           <h1>{orgName}</h1>
-          <p className="login-subtitle">Admin Panel</p>
         </div>
 
         {/* Login Form */}

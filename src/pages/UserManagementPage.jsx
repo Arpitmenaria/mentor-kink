@@ -407,7 +407,7 @@ export default function UserManagementPage({ onLogout }) {
                 </div>
                 <div className="detail-item">
                   <label>PHONE</label>
-                  <p>{selectedUser.phone || 'N/A'}</p>
+                  <p>{selectedUser.phone ? `${selectedUser.phoneCountryCode || ''} ${selectedUser.phone}`.trim() : 'N/A'}</p>
                 </div>
                 <div className="detail-item">
                   <label>LOCATION</label>
