@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Music } from 'lucide-react';
+import { Music, Eye, EyeOff } from 'lucide-react';
 import './AuthorLoginPage.css';
 
 export default function AuthorLoginPage({ onLogin }) {
@@ -176,8 +176,9 @@ export default function AuthorLoginPage({ onLogin }) {
                 type="button"
                 className="password-toggle"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? '👁️' : '👁️‍🗨️'}
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </div>
