@@ -305,14 +305,6 @@ export default function GroupManagementPage({ onCreateClick, onLogout }) {
                     <span className={`group-details-pill pill-${groupDetails.privacy}`}>{groupDetails.privacy}</span>
                   </div>
                   <div className="group-details-field">
-                    <label>ADMIN APPROVAL</label>
-                    <p>{groupDetails.adminApproval ? 'Required' : 'Not required'}</p>
-                  </div>
-                  <div className="group-details-field">
-                    <label>MIN AGE</label>
-                    <p>{groupDetails.minAge || 'N/A'}</p>
-                  </div>
-                  <div className="group-details-field">
                     <label>OWNER</label>
                     <p>{groupDetails.admin?.fullName || 'N/A'}</p>
                   </div>

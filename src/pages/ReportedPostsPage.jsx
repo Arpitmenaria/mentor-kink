@@ -17,6 +17,14 @@ function CheckIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>;
 }
 
+function EyeIcon() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
+}
+
+function CloseIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+}
+
 const API_BASE_URL = 'https://kick-analyst-backend-production.jay886631.workers.dev';
 
 const formatDate = (dateString) => {
@@ -36,6 +44,7 @@ export default function ReportedPostsPage({ onLogout }) {
   const [error, setError] = useState('');
   const [openActionMenu, setOpenActionMenu] = useState(null);
   const [actionLoading, setActionLoading] = useState({});
+  const [selectedPost, setSelectedPost] = useState(null);
 
   const getAuthHeader = () => {
     const token = localStorage.getItem('authToken');
@@ -238,6 +247,13 @@ export default function ReportedPostsPage({ onLogout }) {
                   <div className="action-menu-container">
                     <button
                       className="action-btn"
+                      onClick={() => setSelectedPost(post)}
+                      title="View post details"
+                    >
+                      <EyeIcon />
+                    </button>
+                    <button
+                      className="action-btn"
                       onClick={() => setOpenActionMenu(openActionMenu === post.postId ? null : post.postId)}
                       disabled={actionLoading[post.postId]}
                     >
@@ -270,6 +286,84 @@ export default function ReportedPostsPage({ onLogout }) {
           </tbody>
         </table>
       </div>
+
+      {selectedPost && (
+        <div className="post-details-modal-overlay" onClick={() => setSelectedPost(null)}>
+          <div className="post-details-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="post-details-header">
+              <div>
+                <h2 className="post-details-title">{selectedPost.author?.fullName || 'Unknown author'}</h2>
+                <p className="post-details-subtitle">Reported post details</p>
+              </div>
+              <button className="post-details-close" onClick={() => setSelectedPost(null)} aria-label="Close">
+                <CloseIcon />
+              </button>
+            </div>
+
+            <div className="post-details-content">
+              <div className="post-details-author">
+                <div
+                  className="post-details-avatar"
+                  style={selectedPost.author?.avatar ? { backgroundImage: `url(${selectedPost.author.avatar})` } : {}}
+                >
+                  {!selectedPost.author?.avatar && (selectedPost.author?.fullName?.charAt(0).toUpperCase() || '?')}
+                </div>
+                <div>
+                  <p className="post-details-author-name">{selectedPost.author?.fullName || 'Unknown author'}</p>
+                  {selectedPost.author?.email && <p className="post-details-author-email">{selectedPost.author.email}</p>}
+                </div>
+              </div>
+
+              <div className="post-details-field">
+                <label>POST CONTENT</label>
+                <p className="post-details-full-content">{selectedPost.content || 'N/A'}</p>
+              </div>
+
+              <div className="post-details-info">
+                <div className="post-details-field">
+                  <label>STATUS</label>
+                  <span className={`badge-status ${selectedPost.reviewed ? 'reviewed' : 'pending'}`}>
+                    {selectedPost.reviewed ? 'Reviewed' : 'Pending'}
+                  </span>
+                </div>
+                <div className="post-details-field">
+                  <label>TOTAL REPORTS</label>
+                  <p>{selectedPost.reportsCount ?? selectedPost.reports?.length ?? 0}</p>
+                </div>
+                <div className="post-details-field">
+                  <label>REPORTED DATE</label>
+                  <p>{formatDate(selectedPost.createdAt)}</p>
+                </div>
+                <div className="post-details-field">
+                  <label>POST ID</label>
+                  <p className="post-details-mono">{selectedPost.postId || 'N/A'}</p>
+                </div>
+              </div>
+
+              <div className="post-details-field">
+                <label>REPORT REASONS</label>
+                <div className="post-details-reports-list">
+                  {selectedPost.reports?.length > 0 ? (
+                    selectedPost.reports.map((report, idx) => (
+                      <div key={idx} className="post-details-report-item">
+                        <span className="reason-text">{report.reason}</span>
+                        {report.reportedBy?.fullName && (
+                          <span className="post-details-report-by">by {report.reportedBy.fullName}</span>
+                        )}
+                        {report.createdAt && (
+                          <span className="post-details-report-date">{formatDate(report.createdAt)}</span>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="post-details-no-reports">No individual report details available.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

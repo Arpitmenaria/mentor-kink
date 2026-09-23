@@ -208,6 +208,10 @@
   display: block;
 }
 
+.cg-field > label {
+  margin-bottom: 8px;
+}
+
 .cg-label-row {
   display: flex;
   align-items: baseline;
