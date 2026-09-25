@@ -53,21 +53,9 @@ function getEventStatus(ev) {
   return 'Upcoming';
 }
 
-// The list endpoint returns `location` as a plain "city, state" string; the
-// details endpoint returns it as a {venue, street, city, country, ...}
-// object — handle both shapes.
-function getEventLocation(ev) {
-  const eventType = (ev.eventType || '').toLowerCase();
-  if (eventType === 'online') return 'Online';
-
-  if (typeof ev.location === 'string') {
-    return ev.location ? ev.location : (eventType === 'both' ? 'Online' : 'N/A');
-  }
-
-  const loc = ev.location || {};
-  const parts = [loc.city, loc.country].filter(Boolean);
-  if (parts.length) return parts.join(', ') + (eventType === 'both' ? ' + Online' : '');
-  return eventType === 'both' ? 'Online' : 'N/A';
+function getEventTypeLabel(ev) {
+  if (!ev.eventType) return 'N/A';
+  return ev.eventType.charAt(0).toUpperCase() + ev.eventType.slice(1).toLowerCase();
 }
 
 export default function EventManagementPage({ onCreateClick, onLogout }) {
@@ -274,7 +262,7 @@ export default function EventManagementPage({ onCreateClick, onLogout }) {
             <tr>
               <th>EVENT NAME</th>
               <th>CATEGORY</th>
-              <th>LOCATION</th>
+              <th>EVENT TYPE</th>
               <th>DATE</th>
               <th>ACTIONS</th>
             </tr>
@@ -289,7 +277,7 @@ export default function EventManagementPage({ onCreateClick, onLogout }) {
                   </div>
                 </td>
                 <td>{event.category}</td>
-                <td className="location">{getEventLocation(event)}</td>
+                <td className="location">{getEventTypeLabel(event)}</td>
                 <td className="date">{formatDate(getEventDateString(event))}</td>
                 <td className="action-cell">
                   <button className="action-btn" onClick={() => handleViewEvent(event)} title="View event details">

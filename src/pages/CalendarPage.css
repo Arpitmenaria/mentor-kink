@@ -624,24 +624,6 @@
 .cal-date-range-row .dtp-wrap { flex: 1; width: auto; min-width: 0; }
 .cal-date-range-sep { color: #4b5a7a; font-size: 12px; }
 
-.dtp-wrap { width: 100%; }
-
-.dtp-input {
-  width: 100%;
-  padding: 9px 12px;
-  background: #111422;
-  border: 1px solid #1e2238;
-  border-radius: 8px;
-  color: #e7eaf6;
-  font-size: 13px;
-  font-family: inherit;
-  cursor: pointer;
-  color-scheme: dark;
-}
-.dtp-input:focus { outline: none; border-color: #2563eb; }
-.dtp-input::-webkit-calendar-picker-indicator { opacity: 0.7; cursor: pointer; }
-.dtp-input::-webkit-calendar-picker-indicator:hover { opacity: 1; }
-
 /* ── CountrySelect ── */
 .cs-wrap { position: relative; }
 

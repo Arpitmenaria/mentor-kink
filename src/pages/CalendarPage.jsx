@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { CustomDatePicker } from '../components/DateTimePicker';
 import './CalendarPage.css';
 
 /* ── Sidebar nav icons ── */
@@ -21,28 +22,6 @@ function ChevronDownIcon()  { return <svg width="14" height="14" viewBox="0 0 24
    Referenced elsewhere in this codebase as shared/imported components, but
    nothing under that name actually exists in this project — defined here,
    scoped to this file, since only the calendar filter panel uses them. */
-function CustomDatePicker({ value, onChange, min, max, placeholder }) {
-  const openPicker = (e) => {
-    if (e.target.showPicker) {
-      try { e.target.showPicker(); } catch { /* unsupported/disabled — ignore */ }
-    }
-  };
-  return (
-    <div className="dtp-wrap">
-      <input
-        type="date"
-        className="dtp-input"
-        value={value || ''}
-        onChange={onChange}
-        min={min}
-        max={max}
-        placeholder={placeholder}
-        onClick={openPicker}
-      />
-    </div>
-  );
-}
-
 function CountrySelect({ value, onChange, placeholder = 'Any country' }) {
   const countries = [
     'United States', 'United Kingdom', 'Canada', 'Australia', 'India',

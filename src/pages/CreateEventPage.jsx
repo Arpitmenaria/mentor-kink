@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ImageCropper from '../components/ImageCropper';
+import { CustomDatePicker, CustomTimePicker } from '../components/DateTimePicker';
 import './CreateEventPage.css';
 
 const getTodayISO = () => new Date().toISOString().slice(0, 10);
@@ -126,12 +127,6 @@ export default function CreateEventPage({ onBack, onCreateEvent, onLogout }) {
 
   const updateField = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const openPicker = (e) => {
-    if (e.target.showPicker) {
-      try { e.target.showPicker(); } catch { /* ignore unsupported/disabled cases */ }
-    }
   };
 
   const handleCoverChange = (e) => {
@@ -414,52 +409,45 @@ export default function CreateEventPage({ onBack, onCreateEvent, onLogout }) {
                   <div className="ev-date-grid">
                     <div className="ev-field">
                       <label className="ev-label ev-label--small">Start Date <span style={{ color: '#ef4444' }}>*</span></label>
-                      <input
-                        type="date"
-                        className={`ev-input${stepErrors.startDate ? ' ev-input--error' : ''}`}
+                      <CustomDatePicker
                         value={form.startDate}
                         min={getTodayISO()}
+                        hasError={!!stepErrors.startDate}
+                        placeholder="Pick start date"
                         onChange={(e) => {
                           updateField('startDate', e.target.value);
                           if (stepErrors.startDate) setStepErrors(p => ({ ...p, startDate: '' }));
                           // Keep end date from silently sitting before the new start date.
-                          if (form.endDate && form.endDate < e.target.value) {
+                          if (form.endDate && e.target.value && form.endDate < e.target.value) {
                             updateField('endDate', e.target.value);
                           }
                         }}
-                        onClick={openPicker}
                       />
                       {stepErrors.startDate && <span className="ev-field-error">{stepErrors.startDate}</span>}
                     </div>
                     <div className="ev-field">
                       <label className="ev-label ev-label--small">Start Time</label>
-                      <input
-                        type="time"
-                        className="ev-input"
+                      <CustomTimePicker
                         value={form.startTime}
+                        placeholder="Pick start time"
                         onChange={(e) => updateField('startTime', e.target.value)}
-                        onClick={openPicker}
                       />
                     </div>
                     <div className="ev-field">
                       <label className="ev-label ev-label--small">End Date</label>
-                      <input
-                        type="date"
-                        className="ev-input"
+                      <CustomDatePicker
                         value={form.endDate}
                         min={form.startDate || getTodayISO()}
+                        placeholder="Pick end date"
                         onChange={(e) => updateField('endDate', e.target.value)}
-                        onClick={openPicker}
                       />
                     </div>
                     <div className="ev-field">
                       <label className="ev-label ev-label--small" style={{ opacity: form.isAllDay ? 0.4 : 1 }}>End Time</label>
-                      <input
-                        type="time"
-                        className="ev-input"
+                      <CustomTimePicker
                         value={form.endTime}
+                        placeholder="Pick end time"
                         onChange={(e) => updateField('endTime', e.target.value)}
-                        onClick={openPicker}
                         disabled={form.isAllDay}
                       />
                     </div>

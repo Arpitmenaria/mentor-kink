@@ -472,23 +472,6 @@
   width: 100%;
 }
 
-input[type="date"].ev-input,
-input[type="time"].ev-input {
-  cursor: pointer;
-  color-scheme: dark;
-}
-
-input[type="date"].ev-input::-webkit-calendar-picker-indicator,
-input[type="time"].ev-input::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  opacity: 0.8;
-}
-
-input[type="date"].ev-input::-webkit-calendar-picker-indicator:hover,
-input[type="time"].ev-input::-webkit-calendar-picker-indicator:hover {
-  opacity: 1;
-}
-
 .ev-textarea {
   resize: vertical;
 }
