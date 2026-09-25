@@ -2,6 +2,8 @@ import { useState } from 'react';
 import ImageCropper from '../components/ImageCropper';
 import './CreateEventPage.css';
 
+const getTodayISO = () => new Date().toISOString().slice(0, 10);
+
 function BackIcon() {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>;
 }
@@ -416,9 +418,14 @@ export default function CreateEventPage({ onBack, onCreateEvent, onLogout }) {
                         type="date"
                         className={`ev-input${stepErrors.startDate ? ' ev-input--error' : ''}`}
                         value={form.startDate}
+                        min={getTodayISO()}
                         onChange={(e) => {
                           updateField('startDate', e.target.value);
                           if (stepErrors.startDate) setStepErrors(p => ({ ...p, startDate: '' }));
+                          // Keep end date from silently sitting before the new start date.
+                          if (form.endDate && form.endDate < e.target.value) {
+                            updateField('endDate', e.target.value);
+                          }
                         }}
                         onClick={openPicker}
                       />
@@ -440,6 +447,7 @@ export default function CreateEventPage({ onBack, onCreateEvent, onLogout }) {
                         type="date"
                         className="ev-input"
                         value={form.endDate}
+                        min={form.startDate || getTodayISO()}
                         onChange={(e) => updateField('endDate', e.target.value)}
                         onClick={openPicker}
                       />
@@ -517,7 +525,14 @@ export default function CreateEventPage({ onBack, onCreateEvent, onLogout }) {
                           key={t.id}
                           type="button"
                           className={`ev-type-btn${form.eventType === t.id ? ' ev-type-btn--active' : ''}`}
-                          onClick={() => setForm(prev => ({ ...prev, eventType: t.id }))}
+                          onClick={() => {
+                            setForm(prev => ({ ...prev, eventType: t.id }));
+                            // Pre-select the matching Location/Virtual tab so
+                            // an "Online" event doesn't land on step 3 still
+                            // showing the (disabled) Physical Event tab.
+                            if (t.id === 'online') setLocationTab('online');
+                            else if (t.id === 'offline') setLocationTab('physical');
+                          }}
                         >
                           <span>{t.label}</span>
                         </button>

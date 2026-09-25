@@ -57,10 +57,13 @@ function getEventStatus(ev) {
 // details endpoint returns it as a {venue, street, city, country, ...}
 // object — handle both shapes.
 function getEventLocation(ev) {
-  if (typeof ev.location === 'string') return ev.location || 'N/A';
-
   const eventType = (ev.eventType || '').toLowerCase();
   if (eventType === 'online') return 'Online';
+
+  if (typeof ev.location === 'string') {
+    return ev.location ? ev.location : (eventType === 'both' ? 'Online' : 'N/A');
+  }
+
   const loc = ev.location || {};
   const parts = [loc.city, loc.country].filter(Boolean);
   if (parts.length) return parts.join(', ') + (eventType === 'both' ? ' + Online' : '');
