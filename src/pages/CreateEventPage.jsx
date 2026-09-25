@@ -46,8 +46,8 @@ const EVENT_TYPES = [
 
 const VISIBILITY_OPTIONS = [
   { id: 'anyone', label: 'Anyone' },
-  { id: 'friends', label: 'Friends only' },
-  { id: 'only_me', label: 'Only me' },
+  // { id: 'friends', label: 'Friends only' },
+  // { id: 'only_me', label: 'Only me' },
 ];
 
 const STEP_LABELS = ['Basic Info', 'Plans & Pricing', 'Location & Logistics', 'Review & Publish'];
