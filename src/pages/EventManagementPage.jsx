@@ -25,6 +25,18 @@ function TrashIcon() {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
 }
 
+function DotsIcon() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>;
+}
+
+function CheckIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>;
+}
+
+function CalendarPlusIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>;
+}
+
 const API_BASE_URL = 'https://kick-analyst-backend-production.jay886631.workers.dev';
 
 function formatDate(isoString) {
@@ -69,6 +81,10 @@ export default function EventManagementPage({ onCreateClick, onLogout }) {
   const [eventDetails, setEventDetails] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [detailsError, setDetailsError] = useState('');
+
+  const [openActionMenu, setOpenActionMenu] = useState(null);
+  const [confirmCalendarEvent, setConfirmCalendarEvent] = useState(null);
+  const [addingToCalendar, setAddingToCalendar] = useState(false);
 
   const getAuthHeader = () => {
     const token = localStorage.getItem('authToken');
@@ -195,6 +211,45 @@ export default function EventManagementPage({ onCreateClick, onLogout }) {
     }
   };
 
+  const handleConfirmAddToCalendar = async () => {
+    if (!confirmCalendarEvent) return;
+    const eventId = confirmCalendarEvent.id || confirmCalendarEvent._id;
+
+    try {
+      setAddingToCalendar(true);
+      const orgId = getOrgId();
+      const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}/events/${eventId}/add-to-main-calendar`, {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify({ confirm: true }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('organization');
+          if (onLogout) onLogout();
+          return;
+        }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to add event to the main calendar');
+      }
+
+      // Backend marks the event addedToMainCalendar: true — reflect that
+      // locally so the dropdown option flips to its "already added" state
+      // without needing a full re-fetch.
+      setEvents((prev) => prev.map((e) =>
+        (e.id || e._id) === eventId ? { ...e, addedToMainCalendar: true } : e
+      ));
+      setConfirmCalendarEvent(null);
+    } catch (err) {
+      alert(err.message);
+      console.error('Error adding event to main calendar:', err);
+    } finally {
+      setAddingToCalendar(false);
+    }
+  };
+
   const filteredEvents = events.filter((event) => {
     const matchesSearch =
       (event.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -280,12 +335,47 @@ export default function EventManagementPage({ onCreateClick, onLogout }) {
                 <td className="location">{getEventTypeLabel(event)}</td>
                 <td className="date">{formatDate(getEventDateString(event))}</td>
                 <td className="action-cell">
-                  <button className="action-btn" onClick={() => handleViewEvent(event)} title="View event details">
-                    <EyeIcon />
-                  </button>
-                  <button className="action-btn action-btn--danger" onClick={() => handleDeleteEvent(event)} title="Delete event">
-                    <TrashIcon />
-                  </button>
+                  <div className="action-menu-container">
+                    <button className="action-btn" onClick={() => handleViewEvent(event)} title="View event details">
+                      <EyeIcon />
+                    </button>
+                    <button className="action-btn action-btn--danger" onClick={() => handleDeleteEvent(event)} title="Delete event">
+                      <TrashIcon />
+                    </button>
+                    <button
+                      className="action-btn"
+                      onClick={() => {
+                        const eventId = event.id || event._id;
+                        setOpenActionMenu(openActionMenu === eventId ? null : eventId);
+                      }}
+                      title="More actions"
+                    >
+                      <DotsIcon />
+                    </button>
+                    {openActionMenu === (event.id || event._id) && (
+                      <div className="action-dropdown-menu">
+                        {event.addedToMainCalendar ? (
+                          <button className="action-option" disabled title="Already added to the main calendar">
+                            <CheckIcon />
+                            Added to Main Calendar
+                          </button>
+                        ) : (
+                          <button
+                            className="action-option"
+                            onClick={() => {
+                              setConfirmCalendarEvent(event);
+                              setOpenActionMenu(null);
+                            }}
+                            disabled={event.status && event.status !== 'published'}
+                            title={event.status && event.status !== 'published' ? 'Only published events can be added to the main calendar' : ''}
+                          >
+                            <CalendarPlusIcon />
+                            Add to Main Calendar
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -377,6 +467,33 @@ export default function EventManagementPage({ onCreateClick, onLogout }) {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {confirmCalendarEvent && (
+        <div className="confirm-modal-overlay" onClick={() => !addingToCalendar && setConfirmCalendarEvent(null)}>
+          <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="confirm-modal-title">Add to Main Calendar</h3>
+            <p className="confirm-modal-text">
+              Are you sure you want to proceed? This event will be added to the main calendar.
+            </p>
+            <div className="confirm-modal-actions">
+              <button
+                className="confirm-modal-cancel"
+                onClick={() => setConfirmCalendarEvent(null)}
+                disabled={addingToCalendar}
+              >
+                Cancel
+              </button>
+              <button
+                className="confirm-modal-add"
+                onClick={handleConfirmAddToCalendar}
+                disabled={addingToCalendar}
+              >
+                {addingToCalendar ? 'Adding...' : 'Add'}
+              </button>
+            </div>
           </div>
         </div>
       )}
